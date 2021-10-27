@@ -2,7 +2,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import 'package:mensajitos/services/auth_service.dart';
 
 import 'package:mensajitos/widgets/btn_orange.dart';
 import 'package:mensajitos/widgets/custom_input.dart';
@@ -12,6 +15,7 @@ import 'package:mensajitos/widgets/labels.dart';
 class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
         backgroundColor: Color(0xfff2f2f2),
         body: SafeArea(
@@ -75,6 +79,9 @@ class __FormCustomState extends State<_FormCustom> {
 
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>(context, listen: false);
+
     return Container(
       margin: EdgeInsets.only(top: 41),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -104,8 +111,12 @@ class __FormCustomState extends State<_FormCustom> {
             textController: pass2Ctrol,
             isPassword: true,
           ),
-          BotonNaranja(
-            onPressed: () {
+          Provider.of<AuthService>(context).autenticando
+          ?LinearProgressIndicator(
+            backgroundColor: Colors.orange,
+          )
+          :BotonNaranja(
+            onPressed: () async{
               if (namCtrol.text.length != 0 &&
                   emailCtrol.text.length != 0 &&
                   passCtrol.text.length != 0 &&
@@ -123,6 +134,16 @@ class __FormCustomState extends State<_FormCustom> {
                       Colors.red[400]);
                 } else {
                   print('Todo bien todo correcto');
+                  final registroOK = await authService.register(
+                      namCtrol.text.trim(), emailCtrol.text.trim(), passCtrol.text.trim());
+                  if (registroOK == true) {
+                    Navigator.pushReplacementNamed(context, 'usuarios');
+                  } else {
+                    showSnackBar(
+                        'Error al registrar:',
+                        ' el correo ya está registrado.',
+                        Colors.red[400]);
+                  }
                 }
               } else {
                 showSnackBar(
@@ -131,7 +152,7 @@ class __FormCustomState extends State<_FormCustom> {
                     Colors.red[400]);
               }
             },
-            texto: 'Acceder',
+            texto: 'Crear cuenta',
           )
         ],
       ),

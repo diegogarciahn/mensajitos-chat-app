@@ -1,6 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
+import 'package:mensajitos/services/auth_service.dart';
+
+import 'package:mensajitos/helpers/mostrar_snackbar.dart';
 
 import 'package:mensajitos/widgets/btn_orange.dart';
 import 'package:mensajitos/widgets/custom_input.dart';
@@ -77,6 +82,9 @@ class __FormCustomState extends State<_FormCustom> {
 
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>(context, listen: false);
+
     return Container(
       margin: EdgeInsets.only(top: 41),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -94,10 +102,30 @@ class __FormCustomState extends State<_FormCustom> {
             textController: passCtrol,
             isPassword: true,
           ),
-          BotonNaranja(
-            onPressed: (){
-              print(emailCtrol.text);
-              print(passCtrol.text);
+          Provider.of<AuthService>(context).autenticando 
+          ?LinearProgressIndicator(
+            backgroundColor: Colors.orange,
+          )
+          :BotonNaranja(
+            onPressed: () async{
+              if(emailCtrol.text.isNotEmpty && passCtrol.text.isNotEmpty) {
+
+                FocusScope.of(context).unfocus();
+
+                final loginOk = await authService.login(emailCtrol.text.trim(), passCtrol.text.trim());
+
+                if (loginOk) {
+                  Navigator.pushReplacementNamed(context, 'usuarios');
+                } else {
+                  showSnackBar(
+                        'Datos incorrectos:',
+                        ' por favor revise bien sus credenciales.',
+                        Colors.red[400],
+                        context);
+                }
+              } else {
+                showSnackBar('Datos incompletos:', ' por favor complete todos los campos.', Colors.red[400], context);
+              }
             },
             texto: 'Acceder',
           )

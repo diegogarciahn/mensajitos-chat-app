@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mensajitos/services/auth_service.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'package:mensajitos/models/usuario_model.dart';
@@ -27,13 +29,20 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final usuario = authService.usuario;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Mi nombre'),
+        title: Text(usuario.nombre, style: GoogleFonts.montserrat(fontSize: 20)),
         elevation: 1,
         backgroundColor: Colors.white,
         leading: IconButton(
-          icon: Icon(Icons.exit_to_app), onPressed: (){}
+          icon: Icon(Icons.exit_to_app), onPressed: (){
+            Navigator.pushReplacementNamed(context, 'login');
+            AuthService.deleteToken();
+          }
           ),
         actions: [
           Container(
@@ -66,6 +75,9 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   ListTile _usuarioListTile(Usuario usuario) {
     return ListTile(
+      onTap: (){
+        Navigator.pushNamed(context, 'chat');
+      },
         title: Text(usuario.nombre),
         leading: CircleAvatar(
           backgroundColor: Colors.orange[600],
